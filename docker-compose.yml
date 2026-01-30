@@ -1,0 +1,38 @@
+version: "3.8"
+
+networks:
+  aw-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+
+services:
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - aw-network
+    volumes:
+      - type: bind
+        source: ./prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - aw-network
+    depends_on:
+      - prometheus
+
+  loki:
+    image: grafana/loki:2.9.2
+    ports:
+      - "3100:3100"
+    networks:
+      - aw-network
+    command: -config.file=/etc/loki/local-config.yaml
